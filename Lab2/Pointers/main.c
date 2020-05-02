@@ -1,5 +1,3 @@
-#include "stm32f10x.h"
-
 void delay(int ms) {
 	for(int i = 0; i < 10000 * ms; i++) { }
 }
@@ -10,36 +8,40 @@ const int b10_t = 2;
 
 int main(void)
 {	
-	RCC->APB2ENR |= RCC_APB2ENR_IOPAEN | RCC_APB2ENR_IOPBEN;
+	int *ptr_RCC_APB2ENR = (int*)0x40021018;	
+	*ptr_RCC_APB2ENR |= 0x000C;
 	
-	GPIOA->CRL |= GPIO_CRL_MODE2;
-	GPIOA->CRL &= ~GPIO_CRL_CNF2;
+	int *GPIO_A_CRL = (int*)0x40010800;	
+	*GPIO_A_CRL = 0x00000300;
+	int *GPIO_A_ODR = (int*)0x4001080C;
+	*GPIO_A_ODR = 0x00000002;
 	
-	GPIOB->CRH |= GPIO_CRH_MODE10;
-	GPIOB->CRH &= ~GPIO_CRH_CNF10;
+	int *GPIO_B_CRH = (int*)0x40010C04;	
+	*GPIO_B_CRH = 0x00000300;
+	int *GPIO_B_ODR = (int*)0x40010C0C;
 	
 	for(;;)
 	{
-		GPIOA->ODR |= GPIO_ODR_ODR2;
-		GPIOB->ODR |= GPIO_ODR_ODR10;
+		*GPIO_A_ODR = 0x00000002;
+		*GPIO_B_ODR = 0x00000200;
 		
 		if(a2_t < b10_t)
 		{
 			delay(a2_t);
-			GPIOA->ODR &= ~GPIO_ODR_ODR2;
+			*GPIO_A_ODR = 0x00000000;
 			
 			delay(b10_t - a2_t);
-			GPIOB->ODR &= ~GPIO_ODR_ODR10;
+			*GPIO_B_ODR = 0x00000000;
 		
 			delay(T - b10_t);
 		}
 		else
 		{
 			delay(b10_t);
-			GPIOB->ODR &= ~GPIO_ODR_ODR10;
+			*GPIO_B_ODR = 0x00000000;
 			
 			delay(a2_t - b10_t);
-			GPIOA->ODR &= ~GPIO_ODR_ODR2;
+			*GPIO_A_ODR = 0x00000000;
 		
 			delay(T - a2_t);
 		}
